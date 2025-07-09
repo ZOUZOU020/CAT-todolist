@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>懸浮待辦事項</title>
+    <style>
+        :root {
+            --primary-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --base-font-size: 12px;
+            --background-light: rgba(221, 216, 216, 0.8);
+            --text-color-light: #7b706b;
+            --background-dark: rgba(79, 75, 73, 0.8);
+            --text-color-dark: #eee;
+            --button-bg-color: #c4bcb2;
+            --button-text-color: white;
+            --button-border-radius: 8px;
+            --button-padding: 0.5rem 1rem;
+        }
+
+        body {
+            font-family: var(--primary-font);
+            background-color: transparent; /* Make body transparent */
+            color: var(--text-color-light);
+            margin: 0;
+            padding: 0.2rem; /* Reduced padding */
+            padding-top: 150px; /* Make space for the GIF */
+            border-radius: 10px;
+            font-size: var(--base-font-size);
+            transition: background-color 0.3s, color 0.3s;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #gif-container {
+            position: absolute;
+            top: 10px;
+            left: 30%;
+            transform: translateX(-30%);
+            width: 200px; /* Fixed width */
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+        }
+
+        #gif-container img {
+            width: 200px; /* Fixed width */
+            pointer-events: auto; /* Allow clicks on the GIF */
+        }
+        body.dark-mode {
+            background-color: transparent;
+            color: var(--text-color-dark);
+        }
+        .container {
+            -webkit-app-region: no-drag;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 1.6rem - 150px); /* Adjust for top padding */
+            box-sizing: border-box;
+            background-color: var(--background-light);
+            border-radius: 10px;
+            padding: 1rem; /* Reduced padding */
+            margin: 0 5px; /* Reduced margin */
+        }
+        body.dark-mode .container {
+            background-color: var(--background-dark);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.2rem 0;
+            margin-bottom: 0.5rem;
+            -webkit-app-region: drag;
+        }
+        .header > * {
+            -webkit-app-region: no-drag;
+        }
+        #opacity-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            max-width: 100px;
+            height: 8px;
+            background: #ddd;
+            outline: none;
+            border-radius: 4px;
+        }
+        #opacity-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #90ACAD;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+
+        #opacity-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: #90ACAD;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+ 
+        #todo-list-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 5px; /* space for scrollbar */
+        }
+        .controls {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px; /* Add gap between controls */
+        }
+        body.dark-mode .controls {
+            border-top-color: #444;
+        }
+        .controls label, .controls button {
+            font-size: 8px;
+        }
+        .controls input[type="range"] {
+            width: 80px;
+        }
+        #theme-toggle-btn {
+            padding: 0.3rem 0.6rem;
+        }
+        h1 {
+            font-size: 0.8rem;
+            margin: 0;
+            color: #8f7e74;
+        }
+        body.dark-mode h1 {
+            color: #eee;
+        }
+        .input-area {
+            display: grid;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        #todo-input, #todo-details-input, #urgency-input, #deadline-input, #assignee-input, .category-area select, select { font-size: 0.9em;
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        body.dark-mode #todo-input, body.dark-mode #todo-details-input, body.dark-mode #urgency-input, body.dark-mode #deadline-input, body.dark-mode #assignee-input, body.dark-mode select {
+            background-color: #444;
+            color: #eee;
+            border-color: #555;
+        }
+
+        #add-btn, #theme-toggle-btn, #always-on-top-btn, #close-btn { 
+            padding: var(--button-padding);
+            border: none; 
+            color: var(--button-text-color);
+            font-size: 1rem;
+            border-radius: var(--button-border-radius);
+            cursor: pointer; 
+            background-color: var(--button-bg-color);
+        }
+        #close-btn {
+            background: transparent;
+            color: inherit;
+            font-size: 1rem;
+            padding: 0 .3rem;
+            line-height: 1;
+        }
+        #add-btn { background-color: #92ac98; width: 100%; }
+
+        ul { list-style: none; padding: 0; margin: 0; }
+        li {
+            background: rgba(255,255,255,0.8);
+            padding: 0.7rem;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 0.4rem;
+            border: 1px solid #eee;
+        }
+        body.dark-mode li {
+            background: rgba(50,50,50,0.7);
+            border-color: #444;
+        }
+
+        summary {
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.7rem;
+        }
+        .todo-main { display: flex; align-items: center; width: 100%; }
+        .todo-main span { flex-grow: 1; min-width: 0; overflow-wrap: break-word; font-size: 0.9rem; }
+        .todo-main input[type="checkbox"] { margin-right: 0.5rem; }
+        li.completed .todo-main span { text-decoration: line-through; color: #888; }
+        .todo-details {
+            font-size: 13px;
+            color: #555;
+            margin-top: 0.25rem;
+            padding-left: 2.1rem;
+        }
+
+        .todo-sub-details {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 0.25rem;
+            padding-left: 2.1rem;
+        }
+        body.dark-mode .todo-details, body.dark-mode .todo-sub-details { color: #aaa; }
+        .delete-btn, .edit-btn { background: #5c5869; color: white; border: none; padding: 0.3rem 0.3rem; border-radius: 4px; cursor: pointer; margin-left: 5px; margin-right: 5px; /* Added right margin */ }
+        .edit-btn { background: #ece489; }
+        .edit-form { display: grid; gap: 0.5rem; margin-top: 0.5rem; }
+        .edit-form input, .edit-form textarea, .edit-form select { width: 100%; box-sizing: border-box; padding: 0.5rem; border-radius: 4px; border: 1px solid #bcbab1; font-size: 0.9rem;}
+        .edit-form button { padding: 0.5rem; border-radius: 4px; border: none; color: white; cursor: pointer; }
+        .save-btn { background-color: #41ba5d; }
+        .cancel-btn { background-color: #6c757d; }
+        .urgency-high { color: rgb(226, 60, 60); font-weight: bold; }
+        .urgency-medium { color: rgb(223, 166, 61); }
+        .urgency-low { color: rgb(51, 143, 51); }
+        textarea { width: 100%; height: 60px; margin-top: 0.5rem; }
+        .category-area { display: flex; gap: 0.5rem; }
+        #category-input { flex-grow: 1; }
+        #manage-categories-btn { padding: 0.3rem; font-size: 1.5em; border: none; background: transparent; }
+
+        /* Category Modal */
+        .modal {
+            display: none; 
+            position: absolute; 
+            z-index: 20;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 280px;
+            background-color: var(--background-light);
+            border-radius: 8px;
+            box-shadow: none;
+        }
+        .modal-content {
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        body.dark-mode .modal {
+            background-color: var(--background-dark);
+        }
+
+        body.dark-mode .modal-content {
+            border-color: #444;
+        }
+
+        body.dark-mode #category-manager input,
+        body.dark-mode #category-manager button {
+            background-color: #444;
+            color: #eee;
+            border-color: #555;
+        }
+
+        body.dark-mode #category-list li {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .close-modal-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close-modal-btn:hover,
+        .close-modal-btn:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .category-add-form {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        #new-category-name {
+            flex-grow: 1;
+            min-width: 100px; /* Prevent shrinking too much */
+        }
+
+        #new-category-color {
+            padding: 0;
+            border: none;
+            width: 30px;
+            height: 30px;
+            background: none;
+        }
+
+        #add-category-btn {
+            flex-shrink: 0;
+        }
+        #category-manager button {
+            padding: 8px 12px;
+        }
+        #category-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .category-item-name {
+            flex-grow: 1;
+            text-align: left; /* Align text to the left */
+        }
+        .category-item-name { flex-grow: 1; }
+        .category-color-button {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }
+        .todo-category-color {
+            width: 10px;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+            border-top-left-radius: 6px;
+            border-bottom-left-radius: 6px;
+        }
+        li { position: relative; padding-left: 0.5rem; /* Adjust padding */ }
+        .todo-main { padding-left: 0.5rem; }
+    </style>
+</head>
+<body>
+    <div id="gif-container">
+        <img src="P-character.gif" alt="character" id="character-gif">
+    </div>
+    <div class="container">
+        <div class="header">
+            <h1 id="app-title" title="雙擊即可編輯標題">咪咪咪咪凹</h1>
+            <button id="close-btn">❌</button>
+        </div>
+        <div id="todo-list-container">
+            <ul id="todo-list"></ul>
+            <details>
+                <summary>來點新的...</summary>
+                <div class="input-area">
+                    <input type="text" id="todo-input" placeholder="這有趣嗎?">
+                    <textarea id="todo-details-input" placeholder="仔細講講😊"></textarea>
+                    <select id="urgency-input">
+                        <option value="low">🐌</option>
+                        <option value="medium">🐈‍⬛</option>
+                        <option value="high">🦖</option>
+                    </select>
+                    <div class="category-area">
+                        <select id="category-input"></select>
+                        <button id="manage-categories-btn">🪐</button>
+                    </div>
+                    <input type="date" id="deadline-input">
+                    <button id="add-btn">新增</button>
+                </div>
+            </details>
+        </div>
+        <div class="controls">
+            <input type="range" id="opacity-slider" min="0.2" max="1" step="0.1" value="0.8" title="調整透明度">
+            <button id="always-on-top-btn" style="padding: 0.2rem 0.5rem;">🔓</button>
+            <button id="theme-toggle-btn" style="padding: 0.2rem 0.5rem;">🧙‍♂️</button>
+        </div>
+    </div>
+
+    <div id="category-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal-btn">&times;</span>
+            <h2>管理分類</h2>
+            <div id="category-manager">
+                <div class="category-add-form">
+                    <input type="text" id="new-category-name" placeholder="新分類名稱">
+                    <input type="color" id="new-category-color" value="#e0e0e0">
+                    <button id="add-category-btn">+</button>
+                </div>
+            </div>
+            <ul id="category-list"></ul>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('opacity-slider').addEventListener('input', (event) => {
+            window.electronAPI.setOpacity(event.target.value);
+        });
+
+        let isAlwaysOnTop = true;
+        const alwaysOnTopBtn = document.getElementById('always-on-top-btn');
+        alwaysOnTopBtn.addEventListener('click', () => {
+            isAlwaysOnTop = !isAlwaysOnTop;
+            window.electronAPI.setAlwaysOnTop(isAlwaysOnTop);
+            alwaysOnTopBtn.style.backgroundColor = isAlwaysOnTop ? '#28a745' : '#dc3545';
+            alwaysOnTopBtn.textContent = isAlwaysOnTop ? '🔒' : '🔓';
+        });
+
+        // Set initial state
+        alwaysOnTopBtn.style.backgroundColor = '#28a745';
+        alwaysOnTopBtn.textContent = '🔒';
+
+        document.getElementById('theme-toggle-btn').addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+        });
+
+        document.getElementById('close-btn').addEventListener('click', () => {
+            window.electronAPI.closeApp();
+        });
+
+        const characterGif = document.getElementById('character-gif');
+        const defaultGif = 'P-character.gif';
+        const interactionGif = 'P-character-interaction.gif'; // Corrected GIF name
+        let isInteracting = false;
+
+        function playInteraction() {
+            if (isInteracting) return;
+            isInteracting = true;
+
+            // To ensure the GIF restarts, we can reload it
+            characterGif.src = `${interactionGif}?t=${new Date().getTime()}`;
+
+            // A bit of a hack to know when the interaction GIF has finished.
+            // We'll assume a fixed duration for the interaction GIF.
+            // Replace 2000 with the actual duration of your interaction GIF in milliseconds.
+            setTimeout(() => {
+                characterGif.src = `${defaultGif}?t=${new Date().getTime()}`;
+                isInteracting = false;
+            }, 14000); // Increased duration to ensure full playback
+        }
+
+        characterGif.addEventListener('click', playInteraction);
+        window.addEventListener('mousemove', (e) => {
+            // This is a simple trigger, you might want something more sophisticated
+            if (e.movementX !== 0 || e.movementY !== 0) {
+                 // To avoid constant triggering, maybe add a cooldown
+                 if (!isInteracting) {
+                    // playInteraction();
+                 }
+            }
+        });
+
+        // We'll listen for the window move event from the main process
+        window.electronAPI.onWindowMoved(playInteraction);
+
+
+        const urgencyEmojis = { low: '🐌', medium: '🐈‍⬛', high: '🦖' };
+        const todoInput = document.getElementById('todo-input');
+        const detailsInput = document.getElementById('todo-details-input');
+        const urgencyInput = document.getElementById('urgency-input');
+        const deadlineInput = document.getElementById('deadline-input');
+        const categoryInput = document.getElementById('category-input');
+        const addBtn = document.getElementById('add-btn');
+        const todoList = document.getElementById('todo-list');
+
+        // Category Management
+        const categoryModal = document.getElementById('category-modal');
+        const manageCategoriesBtn = document.getElementById('manage-categories-btn');
+        const closeModalBtn = document.querySelector('.close-modal-btn');
+        const addCategoryBtn = document.getElementById('add-category-btn');
+        const newCategoryNameInput = document.getElementById('new-category-name');
+        const newCategoryColorInput = document.getElementById('new-category-color');
+        const categoryList = document.getElementById('category-list');
+        let categories = [];
+
+        manageCategoriesBtn.addEventListener('click', () => categoryModal.style.display = 'block');
+        closeModalBtn.addEventListener('click', () => categoryModal.style.display = 'none');
+        window.addEventListener('click', (event) => {
+            if (event.target == categoryModal) {
+                categoryModal.style.display = 'none';
+            }
+        });
+
+        addCategoryBtn.addEventListener('click', () => {
+            const name = newCategoryNameInput.value.trim();
+            const color = newCategoryColorInput.value;
+            if (name && categories.length < 5) {
+                categories.push({ name, color });
+                newCategoryNameInput.value = '';
+                saveAndRenderCategories();
+            }
+        });
+
+        function saveAndRenderCategories() {
+            localStorage.setItem('categories', JSON.stringify(categories));
+            renderCategories();
+            loadTodos(); // Re-render todos to reflect category color changes
+        }
+
+        function loadCategories() {
+            const storedCategories = localStorage.getItem('categories');
+            if (storedCategories) {
+                categories = JSON.parse(storedCategories);
+            } else {
+                // Default categories
+                categories = [
+                    { name: '工作', color: '#ffcdd2' },
+                    { name: '學習', color: '#c8e6c9' },
+                    { name: '生活', color: '#bbdefb' },
+                ];
+            }
+            renderCategories();
+        }
+
+        function renderCategories() {
+            categoryList.innerHTML = '';
+            categoryInput.innerHTML = '';
+            categories.forEach((cat, index) => {
+                // Populate manager list
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <button class="category-color-button" style="background-color: ${cat.color}" data-index="${index}"></button>
+                    <span class="category-item-name">${cat.name}</span>
+                    <button data-index="${index}">刪除</button>
+                `;
+                li.querySelector('.category-color-button').addEventListener('click', (e) => {
+                    const index = e.target.dataset.index;
+                    const newColor = prompt('Enter new color:', categories[index].color);
+                    if (newColor) {
+                        categories[index].color = newColor;
+                        saveAndRenderCategories();
+                    }
+                });
+                li.querySelector('button[data-index]').addEventListener('click', (e) => {
+                    categories.splice(e.target.dataset.index, 1);
+                    saveAndRenderCategories();
+                    loadTodos(); // Refresh todos to reflect category removal
+                });
+                categoryList.appendChild(li);
+
+                // Populate dropdown
+                const option = document.createElement('option');
+                option.value = cat.name;
+                option.textContent = cat.name;
+                categoryInput.appendChild(option);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCategories();
+            loadTodos();
+            loadTitle();
+        });
+
+        const appTitle = document.getElementById('app-title');
+
+        appTitle.addEventListener('dblclick', () => {
+            const currentTitle = appTitle.textContent;
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = currentTitle;
+            input.className = 'title-edit-input'; // For styling
+            appTitle.replaceWith(input);
+            input.focus();
+
+            input.addEventListener('blur', () => saveTitle(input));
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    input.blur();
+                }
+            });
+        });
+
+        function saveTitle(input) {
+            const newTitle = input.value.trim();
+            const newH1 = document.createElement('h1');
+            newH1.id = 'app-title';
+            newH1.title = '雙擊即可編輯標題';
+            newH1.textContent = newTitle || '想睡覺嗎?找件事做完再睡'; // Default if empty
+            input.replaceWith(newH1);
+            localStorage.setItem('appTitle', newTitle);
+            // Re-add the event listener to the new h1 element
+            newH1.addEventListener('dblclick', () => {
+                // The logic from the dblclick listener above is now inside this function
+                const currentTitle = newH1.textContent;
+                const newInput = document.createElement('input');
+                newInput.type = 'text';
+                newInput.value = currentTitle;
+                newInput.className = 'title-edit-input';
+                newH1.replaceWith(newInput);
+                newInput.focus();
+
+                newInput.addEventListener('blur', () => saveTitle(newInput));
+                newInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        newInput.blur();
+                    }
+                });
+            });
+        }
+
+        function loadTitle() {
+            const savedTitle = localStorage.getItem('appTitle');
+            if (savedTitle) {
+                appTitle.textContent = savedTitle;
+            }
+        }
+        addBtn.addEventListener('click', addTodo);
+
+
+        function addTodo() {
+            const todoText = todoInput.value.trim();
+            if (todoText === '') return;
+
+            const li = document.createElement('li');
+            
+
+            const mainDiv = document.createElement('div');
+            mainDiv.className = 'todo-main';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.addEventListener('change', () => li.classList.toggle('completed'));
+
+            const span = document.createElement('span');
+            span.textContent = todoText;
+
+            const editBtn = document.createElement('button');
+            editBtn.textContent = '🎅';
+            editBtn.className = 'edit-btn'; // Add a class for styling
+            editBtn.addEventListener('click', () => editTodo(li));
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = '🪦';
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.addEventListener('click', () => {
+                todoList.removeChild(li);
+                saveTodos();
+            });
+
+            mainDiv.appendChild(checkbox);
+            mainDiv.appendChild(span);
+            mainDiv.appendChild(editBtn);
+            mainDiv.appendChild(deleteBtn);
+
+            li.appendChild(mainDiv);
+
+            const detailsDiv = document.createElement('div');
+            detailsDiv.className = 'todo-details';
+            detailsDiv.textContent = detailsInput.value.trim();
+
+            const subDetailsDiv = document.createElement('div');
+            subDetailsDiv.className = 'todo-sub-details';
+
+            const urgency = urgencyInput.value;
+            const deadline = deadlineInput.value;
+            const category = categoryInput.value;
+
+            const urgencySpan = document.createElement('span');
+            urgencySpan.className = `urgency-${urgency}`;
+            urgencySpan.textContent = ` ${urgencyEmojis[urgency]} `;
+
+            span.appendChild(urgencySpan);
+
+            if (detailsDiv.textContent) {
+                li.appendChild(detailsDiv);
+            }
+
+            if (deadline) {
+                subDetailsDiv.innerHTML += `<span>死線: ${deadline}</span>`;
+            }
+            if (category) {
+                const categoryData = categories.find(c => c.name === category);
+                if (categoryData) {
+                    const colorDiv = document.createElement('div');
+                    colorDiv.className = 'todo-category-color';
+                    colorDiv.style.backgroundColor = categoryData.color;
+                    li.prepend(colorDiv);
+                    li.dataset.category = category; // Set category on the element
+                }
+            }
+
+            if (subDetailsDiv.hasChildNodes()) {
+                li.appendChild(subDetailsDiv);
+            }
+
+            todoList.prepend(li);
+
+            todoInput.value = '';
+            detailsInput.value = '';
+            deadlineInput.value = '';
+            urgencyInput.value = 'low';
+
+            saveTodos();
+        }
+
+        function saveTodos() {
+            const todos = [];
+            document.querySelectorAll('#todo-list li').forEach(li => {
+                if (li.classList.contains('editing')) return; // Don't save tasks being edited
+
+                const todo = {
+                    text: li.querySelector('.todo-main span').childNodes[0].textContent.trim(),
+                    details: li.querySelector('.todo-details') ? li.querySelector('.todo-details').textContent : '',
+                    urgency: li.querySelector('[class^="urgency-"]').className.replace('urgency-', ''),
+                    deadline: li.querySelector('.todo-sub-details span') ? li.querySelector('.todo-sub-details span').textContent.replace('死線: ', '') : '',
+                    completed: li.classList.contains('completed'),
+                    category: li.dataset.category || '' // Read category from dataset
+                };
+                todos.push(todo);
+            });
+            localStorage.setItem('todos', JSON.stringify(todos));
+        }
+
+        function loadTodos() {
+            try {
+                const todos = JSON.parse(localStorage.getItem('todos')) || [];
+                const urgencyOrder = { 'high': 1, 'medium': 2, 'low': 3 };
+
+                todos.sort((a, b) => {
+                    // 1. Sort by Category
+                    const categoryA = a.category || '未分類';
+                    const categoryB = b.category || '未分類';
+                    if (categoryA.localeCompare(categoryB) !== 0) {
+                        return categoryA.localeCompare(categoryB);
+                    }
+
+                    // 2. Sort by Date
+                    const dateA = a.deadline ? new Date(a.deadline) : null;
+                    const dateB = b.deadline ? new Date(b.deadline) : null;
+                    const timeA = dateA && !isNaN(dateA) ? dateA.getTime() : Infinity;
+                    const timeB = dateB && !isNaN(dateB) ? dateB.getTime() : Infinity;
+
+                    if (timeA !== timeB) {
+                        return timeA - timeB;
+                    }
+
+                    // 3. Sort by Urgency
+                    const urgencyA = urgencyOrder[a.urgency] || 4;
+                    const urgencyB = urgencyOrder[b.urgency] || 4;
+                    return urgencyA - urgencyB;
+                });
+
+                todoList.innerHTML = ''; // Clear list before rendering
+                todos.forEach(todo => {
+                    addTodoFromData(todo);
+                });
+            } catch (error) {
+                console.error('Failed to load or render todos:', error);
+                // If parsing or sorting fails, clear the broken data to prevent future crashes.
+                localStorage.removeItem('todos');
+            }
+        }
+
+        function editTodo(li) {
+            if (li.classList.contains('editing')) return;
+            li.classList.add('editing');
+
+            const mainDiv = li.querySelector('.todo-main');
+            const detailsDiv = li.querySelector('.todo-details');
+            const subDetailsDiv = li.querySelector('.todo-sub-details');
+
+            // Store original content
+            const originalContent = mainDiv.innerHTML;
+            const originalDetails = detailsDiv ? detailsDiv.innerHTML : '';
+            const originalSubDetails = subDetailsDiv ? subDetailsDiv.innerHTML : '';
+
+            mainDiv.style.display = 'none';
+            if (detailsDiv) detailsDiv.style.display = 'none';
+            if (subDetailsDiv) subDetailsDiv.style.display = 'none';
+
+            const editForm = createEditForm(li);
+            li.appendChild(editForm);
+
+            editForm.querySelector('.save-btn').addEventListener('click', () => {
+                const newText = editForm.querySelector('.edit-text').value;
+                const newDetails = editForm.querySelector('.edit-details').value;
+                const newUrgency = editForm.querySelector('.edit-urgency').value;
+                const newDeadline = editForm.querySelector('.edit-deadline').value;
+                const newCategory = editForm.querySelector('.edit-category').value;
+
+                // Update the UI
+                const span = mainDiv.querySelector('span');
+                span.childNodes[0].nodeValue = newText + ' ';
+                
+                let urgencySpan = span.querySelector('[class^="urgency-"]');
+                if (!urgencySpan) {
+                    urgencySpan = document.createElement('span');
+                    span.appendChild(urgencySpan);
+                }
+                urgencySpan.className = `urgency-${newUrgency}`;
+                urgencySpan.textContent = ` ${urgencyEmojis[newUrgency]} `;
+
+                // Update details
+                let currentDetailsDiv = li.querySelector('.todo-details');
+                if (newDetails) {
+                    if (!currentDetailsDiv) {
+                        currentDetailsDiv = document.createElement('div');
+                        currentDetailsDiv.className = 'todo-details';
+                        mainDiv.insertAdjacentElement('afterend', currentDetailsDiv);
+                    }
+                    currentDetailsDiv.textContent = newDetails;
+                } else if (currentDetailsDiv) {
+                    currentDetailsDiv.remove();
+                }
+
+                // Update sub-details (deadline)
+                let currentSubDetailsDiv = li.querySelector('.todo-sub-details');
+                if (newDeadline) {
+                    if (!currentSubDetailsDiv) {
+                        currentSubDetailsDiv = document.createElement('div');
+                        currentSubDetailsDiv.className = 'todo-sub-details';
+                        li.appendChild(currentSubDetailsDiv);
+                    }
+                    currentSubDetailsDiv.innerHTML = `<span>死線: ${newDeadline}</span>`;
+                } else if (currentSubDetailsDiv) {
+                    currentSubDetailsDiv.remove();
+                }
+                
+                // Update category
+                li.dataset.category = newCategory;
+                const oldColorDiv = li.querySelector('.todo-category-color');
+                if (oldColorDiv) oldColorDiv.remove();
+                if (newCategory) {
+                    const categoryData = categories.find(c => c.name === newCategory);
+                    if (categoryData) {
+                        const colorDiv = document.createElement('div');
+                        colorDiv.className = 'todo-category-color';
+                        colorDiv.style.backgroundColor = categoryData.color;
+                        li.prepend(colorDiv);
+                    }
+                }
+
+                // Restore visibility and clean up
+                mainDiv.style.display = 'flex';
+                li.querySelectorAll('.todo-details, .todo-sub-details').forEach(el => el.style.display = 'block');
+
+                li.removeChild(editForm);
+                li.classList.remove('editing');
+                saveTodos();
+                loadTodos(); // Reload to apply sorting and grouping
+            });
+
+            editForm.querySelector('.cancel-btn').addEventListener('click', () => {
+                mainDiv.style.display = 'flex';
+                if (detailsDiv) detailsDiv.style.display = 'block';
+                if (subDetailsDiv) subDetailsDiv.style.display = 'block';
+                li.removeChild(editForm);
+                li.classList.remove('editing');
+            });
+        }
+
+        function createEditForm(li) {
+            const currentText = li.querySelector('.todo-main span').childNodes[0].textContent.trim();
+            const currentDetails = li.querySelector('.todo-details') ? li.querySelector('.todo-details').textContent : '';
+            const currentUrgency = li.querySelector('[class^="urgency-"]').className.replace('urgency-', '');
+            const deadlineSpan = li.querySelector('.todo-sub-details span');
+            const currentDeadline = deadlineSpan ? deadlineSpan.textContent.replace('死線: ', '') : '';
+            const currentCategory = li.dataset.category || '';
+
+            const form = document.createElement('div');
+            form.className = 'edit-form';
+            
+            let categoryOptions = '<option value="">無分類</option>'; // Add a default empty option
+            categoryOptions += categories.map(c => `<option value="${c.name}" ${currentCategory === c.name ? 'selected' : ''}>${c.name}</option>`).join('');
+
+            form.innerHTML = `
+                <input type="text" class="edit-text" value="${currentText}">
+                <textarea class="edit-details">${currentDetails}</textarea>
+                <select class="edit-urgency">
+                    <option value="low" ${currentUrgency === 'low' ? 'selected' : ''}>🐌</option>
+                    <option value="medium" ${currentUrgency === 'medium' ? 'selected' : ''}>🐈‍⬛</option>
+                    <option value="high" ${currentUrgency === 'high' ? 'selected' : ''}>🦖</option>
+                </select>
+                <select class="edit-category">
+                    ${categoryOptions}
+                </select>
+                <input type="date" class="edit-deadline" value="${currentDeadline}">
+                <button class="save-btn">儲存</button>
+                <button class="cancel-btn">取消</button>
+            `;
+            return form;
+        }
+
+        function addTodoFromData(todo) {
+            const li = document.createElement('li');
+            if (todo.completed) {
+                li.classList.add('completed');
+            }
+
+            const mainDiv = document.createElement('div');
+            mainDiv.className = 'todo-main';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = todo.completed;
+            checkbox.addEventListener('change', () => {
+                li.classList.toggle('completed');
+                saveTodos();
+            });
+
+            const span = document.createElement('span');
+            span.textContent = todo.text;
+
+            const editBtn = document.createElement('button');
+            editBtn.textContent = '🎅';
+            editBtn.className = 'edit-btn';
+            editBtn.addEventListener('click', () => editTodo(li));
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = '🪦';
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.addEventListener('click', () => {
+                todoList.removeChild(li);
+                saveTodos();
+            });
+
+            mainDiv.appendChild(checkbox);
+            mainDiv.appendChild(span);
+            mainDiv.appendChild(editBtn);
+            mainDiv.appendChild(deleteBtn);
+
+            li.appendChild(mainDiv);
+
+            const urgencySpan = document.createElement('span');
+            urgencySpan.className = `urgency-${todo.urgency}`;
+            urgencySpan.textContent = ` ${urgencyEmojis[todo.urgency]} `;
+
+            span.appendChild(urgencySpan);
+
+            if (todo.details) {
+                const detailsDiv = document.createElement('div');
+                detailsDiv.className = 'todo-details';
+                detailsDiv.textContent = todo.details;
+                li.appendChild(detailsDiv);
+            }
+
+            if (todo.deadline) {
+                const subDetailsDiv = document.createElement('div');
+                subDetailsDiv.className = 'todo-sub-details';
+                subDetailsDiv.innerHTML = `<span>死線: ${todo.deadline}</span>`;
+                li.appendChild(subDetailsDiv);
+            }
+
+            if (todo.category) {
+                const categoryData = categories.find(c => c.name === todo.category);
+                if (categoryData) {
+                    const colorDiv = document.createElement('div');
+                    colorDiv.className = 'todo-category-color';
+                    colorDiv.style.backgroundColor = categoryData.color;
+                    li.prepend(colorDiv);
+                    li.dataset.category = todo.category;
+                }
+            }
+
+            todoList.appendChild(li);
+        }
+    </script>
+</body>
+</html>

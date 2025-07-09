@@ -1,0 +1,28 @@
+{
+  "name": "cat-todolist",
+  "version": "1.0.0",
+  "description": "A floating to-do list application.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "build": "electron-builder"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "publish": null,
+    "appId": "com.example.electrontodo",
+    "productName": "CAT-todolist",
+    "win": {
+      "target": "portable",
+      "icon": "new-icon.png",
+      "signAndEditExecutable": false
+    }
+  }
+}
