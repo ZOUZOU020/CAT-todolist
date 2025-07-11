@@ -20,7 +20,7 @@
     "appId": "com.example.electrontodo",
     "productName": "CAT-todolist",
     "win": {
-      "target": "portable",
+      "target": "nsis",
       "icon": "new-icon.png",
       "signAndEditExecutable": false
     }
