@@ -14,7 +14,7 @@
             --button-bg-color: #c4bcb2;
             --button-text-color: white;
             --button-border-radius: 8px;
-            --button-padding: 0.5rem 1rem;
+            --button-padding: 0.4rem 0.7rem;
         }
 
         body {
@@ -22,8 +22,7 @@
             background-color: transparent; /* Make body transparent */
             color: var(--text-color-light);
             margin: 0;
-            padding: 0.1rem; /* Further reduced padding */
-            padding-top: 150px; /* Make space for the GIF */
+           padding: 140px 0rem 0rem 0rem;
             border-radius: 10px;
             font-size: var(--base-font-size);
             transition: background-color 0.3s, color 0.3s;
@@ -33,7 +32,7 @@
 
         #gif-container {
             position: absolute;
-            top: 10px;
+            top: 12px;
             left: 30%;
             transform: translateX(-30%);
             width: 200px; /* Fixed width */
@@ -44,7 +43,7 @@
         }
 
         #gif-container img {
-            width: 200px; /* Fixed width */
+            width: 180px; /* Fixed width */
             pointer-events: none; /* Disable clicks on the GIF */
         }
         body.dark-mode {
@@ -55,11 +54,11 @@
             -webkit-app-region: no-drag;
             display: flex;
             flex-direction: column;
-            height: calc(100vh - 1.6rem - 150px); /* Adjust for top padding */
+            height: calc(100vh - 0rem - 150px); /* Adjust for top padding */
             box-sizing: border-box;
-            background-color: rgba(221, 216, 216, 0.8); /* 完全不透明 */
+            background-color: rgba(233, 231, 231, 0.9); /* 完全不透明 */
             border-radius: 10px;
-            padding: 0.5rem; /* Further reduced padding */
+            padding: 1rem 0.6rem 0.6rem 0.8rem; /* Further reduced padding 上右下左 */
             margin: 0 2px; /* Further reduced margin */
         }
         body.dark-mode .container {
@@ -132,28 +131,31 @@
             padding: 0.3rem 0.6rem;
         }
         h1 {
-            font-size: 1rem;
+            font-size: 0.9rem;
             margin: 0;
             color: #a19087;
         }
         body.dark-mode h1 {
-            color: #eee;
+            color: #dfdfdf;
         }
         .input-area {
             display: grid;
-            gap: 0.5rem;
+            gap: 0.4rem;
+            margin-top: 0.5rem;
             margin-bottom: 1rem;
         }
-        #todo-input, #todo-details-input, #urgency-input, #deadline-input, #assignee-input, .category-area select, select { font-size: 0.9em;
+        #todo-input, #todo-details-input, #urgency-input, #deadline-input, #assignee-input, .category-area select, select { font-size: 1.1em;
             width: 100%;
+            font-family: 'Microsoft JhengHei', '微軟正黑體', sans-serif; /* <--- 換成微軟正黑體 */
             padding: 0.5rem;
             border: 1px solid #d6c1af;
             border-radius: 4px;
             box-sizing: border-box;
+            color: #9f9f9f;
         }
         body.dark-mode #todo-input, body.dark-mode #todo-details-input, body.dark-mode #urgency-input, body.dark-mode #deadline-input, body.dark-mode #assignee-input, body.dark-mode select {
-            background-color: #444;
-            color: #eee;
+            background-color: #cbc4bc;
+            color: #514e4e;
             border-color: #7d7d7d;
         }
 
@@ -181,7 +183,7 @@
             border-radius: 6px;
             margin-bottom: 0.4rem;
             border: 1px solid #eee;
-            padding: 0.5rem;
+            padding: 0.5rem 0.5rem 0.5rem 0.5rem;
         }
 
         li details > summary {
@@ -194,7 +196,7 @@
             display: none; /* Hide the default triangle in Chrome */
         }
         body.dark-mode li {
-            background: rgba(50,50,50,0.7);
+            background: rgba(50,50,50,0.8);
             border-color: #444;
         }
 
@@ -204,23 +206,91 @@
             width: 100%;
         }
 
+        /* --- 用於客製化 Checkbox 樣式的新增程式碼 --- */
+
+/* 步驟一：重設並繪製新的框線 */
+.todo-summary-content input[type="checkbox"] {
+    /* 移除作業系統預設樣式，這是最關鍵的一步 */
+    -webkit-appearance: none;
+    appearance: none;
+
+    /* 設定為相對定位，作為「打勾」符號的基準點 */
+    position: relative; 
+    
+    /* 設定新框線的大小 */
+    width: 12px;
+    height: 12px;
+
+    /* 設定新框線的樣式 */
+    border: 1.5px solid #888; /* 保留您要的框線，可以調整粗細和顏色 */
+    border-radius: 3px;     /* 加一點圓角 */
+
+    /* 將背景色設為透明 */
+    background-color: transparent;
+
+    /* 讓滑鼠移上去時顯示為可點擊的手指 */
+    cursor: pointer;
+
+    /* 讓它在垂直方向上稍微對齊中間 */
+    vertical-align: middle;
+
+    /* 確保與右側文字的間距 */
+    margin-right: 0.8rem;
+}
+
+/* 步驟二：準備好「打勾」的符號 (預設為隱藏) */
+.todo-summary-content input[type="checkbox"]::after {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: -1px;
+    width: 5px;
+    height: 9px;
+    
+    /* 用邊框技巧畫出一個「V」形狀的勾 */
+    border: solid #d46142; /* 打勾符號的顏色 */
+    border-width: 0 2px 2px 0;
+
+    /* 將 V 旋轉 45 度變成一個完美的勾 */
+    transform: rotate(45deg);
+
+    /* 預設狀態下，讓勾是透明的 (隱藏) */
+    opacity: 0;
+    transition: opacity 0.1s ease-in-out;
+}
+
+/* 步驟三：當 Checkbox 被「勾選」時，讓打勾符號顯示出來 */
+.todo-summary-content input[type="checkbox"]:checked::after {
+    opacity: 1; /* 將透明度設為 1，讓勾顯示出來 */
+}
+
+/* (可選) 當任務完成時，改變框線顏色 */
+li.completed .todo-summary-content input[type="checkbox"] {
+    border-color: #aaa;
+}
+
+/* (可選) 當任務完成時，改變打勾符號顏色 */
+li.completed .todo-summary-content input[type="checkbox"]::after {
+    border-color: #aaa;
+}
+
         .todo-title {
             flex-grow: 1;
             min-width: 0;
             overflow-wrap: break-word;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
         }
 
 
-        .todo-summary-content input[type="checkbox"] { margin-right: 0.5rem; }
+        .todo-summary-content input[type="checkbox"] { margin: 3px 3px 3px 8px; margin-right: 4px; }
         li.completed .todo-title { text-decoration: line-through; color: #888; }
         .todo-content {
             padding: 0.5rem 0 0 1.5rem; /* Indent content */
         }
 
         .todo-details {
-            font-size: 13px;
-            color: #555;
+            font-size: 11px;
+            color: #9b9895;
             margin-bottom: 0.5rem;
         }
 
@@ -228,28 +298,37 @@
             display: flex;
             justify-content: flex-end;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.1rem;
         }
 
-        .todo-deadline {
-            font-size: 0.8rem;
-            color: #be9595;
+        
+        .todo-deadline { 
+            font-size: 0.6rem; 
+            color: #be9595; 
+            margin-right: auto; /* 將元素推到最左邊 */
         }
-        body.dark-mode .todo-details, body.dark-mode  { color: #aaa; }
+        }
+        body.dark-mode .todo-details { color: #ccc; } /* Adjust for lighter color in dark mode */
 .todo-sub-details{ color: #be9595; }
-        .delete-btn, .edit-btn, .delete-category-btn { background: #949494; color: white; border: none; padding: 0.3rem 0.3rem; border-radius: 4px; cursor: pointer; margin-left: 5px; margin-right: 5px; /* Added right margin */ }
+.todo-sub-details{ color: #be9595; }
+        .delete-btn, .edit-btn, .delete-category-btn { background: #949494; color: white; border: none; padding: 0.3rem 0.3rem; border-radius: 4px; cursor: pointer; margin-left: 3px; margin-right: 3px; /* Added right margin */ }
         .edit-btn { background: #ecad25; }
         .edit-form { display: grid; gap: 0.5rem; margin-top: 0.5rem; }
-        .edit-form input, .edit-form textarea, .edit-form select { width: 100%; box-sizing: border-box; padding: 0.3rem; border-radius: 4px; border: 1px solid #bcbab1; font-size: 0.8rem;}
+        .edit-form input, .edit-form textarea, .edit-form select { width: 100%; box-sizing: border-box; padding: 0.3rem; border-radius: 4px; border: 1px solid #d8d6cc; font-size: 0.8rem; font-family: 'Microsoft JhengHei', '微軟正黑體', sans-serif;}
+        body.dark-mode .edit-form input, body.dark-mode .edit-form textarea, body.dark-mode .edit-form select {
+            background-color: #444;
+            color: #eee;
+            border-color: #959595;
+        }
         .edit-form {
             padding-left: 1.5rem; /* Align with todo-content */
         }
-        .edit-form button { padding: 0.5rem; border-radius: 4px; border: none; color: white; cursor: pointer; }
+        .edit-form button { padding: 0.5rem 0.7rem 0.5rem 0.7rem; border-radius: 4px; border: none; color: white; cursor: pointer; }
         .save-btn { background-color: #41ba5d; }
         .cancel-btn { background-color: #6c757d; }
-        .urgency-high { color: rgb(226, 60, 60); font-weight: bold; }
-        .urgency-medium { color: rgb(223, 166, 61); }
-        .urgency-low { color: rgb(51, 143, 51); }
+        .urgency-high { color: rgb(226, 60, 60); font-weight: bold; font-size: 1.3em}
+        .urgency-medium { color: rgb(223, 166, 61); font-size: 1.3em}
+        .urgency-low { color: rgb(51, 143, 51);font-size: 1.3em }
         textarea { width: 100%; height: 60px; margin-top: 0.5rem; }
         .category-area { display: flex; gap: 0.5rem; }
         #category-input { flex-grow: 1; }
@@ -272,10 +351,12 @@
             box-shadow: none;
         }
         .modal-content {
-            padding: 1rem;
+            padding: 0.8rem 1rem 1rem 1rem;
             border: 1px solid #a3a0a0;
             border-radius: 8px;
         }
+        .modal-content h2 { margin: 0; } /* Moved from inline style */
+        .confirm-modal-content { font-family: var(--primary-font); } /* 統一彈出刪除視窗字體 */
         body.dark-mode .modal {
             background-color: rgba(79, 75, 73, 1); /* 完全不透明 */
         }
@@ -331,6 +412,7 @@
         #category-manager button {
             padding: 8px 12px;
         }
+        #category-list button.delete-category-btn { background-color: #e74c3c; font-size: 0.7rem; padding: 0.2rem 0.4rem; } /* 調整刪除按鈕樣式 */
         #category-list li {
             display: flex;
             justify-content: center; /* Centered content */
@@ -384,9 +466,9 @@
                     <input type="text" id="todo-input" placeholder="這好玩嗎?">
                     <textarea id="todo-details-input" placeholder="仔細講講😊"></textarea>
                     <select id="urgency-input">
-                        <option value="low">🐌</option>
-                        <option value="medium">🐈‍⬛</option>
-                        <option value="high">🦖</option>
+                        <option value="low" style="font-size: 1.2em;">🐌</option>
+                        <option value="medium" style="font-size: 1.2em;">🐈</option>
+                        <option value="high" style="font-size: 1.2em;">🦖</option>
                     </select>
                     <div class="category-area">
                         <select id="category-input"></select>
@@ -483,7 +565,7 @@
         window.electronAPI.onWindowMoved(playInteraction);
 
 
-        const urgencyEmojis = { low: '🐌', medium: '🐈‍⬛', high: '🦖' };
+        const urgencyEmojis = { low: '🐌', medium: '🐈', high: '🦖' };
         const todoInput = document.getElementById('todo-input');
         const detailsInput = document.getElementById('todo-details-input');
         const urgencyInput = document.getElementById('urgency-input');
@@ -550,7 +632,7 @@
                 li.innerHTML = `
                     <button class="category-color-button" style="background-color: ${cat.color}" data-index="${index}"></button>
                     <span class="category-item-name">${cat.name}</span>
-                    <button class="delete-category-btn" data-index="${index}">刪除</button>
+                    <button class="delete-category-btn" data-index="${index}">x</button>
                 `;
                 li.querySelector('.delete-category-btn').addEventListener('click', (e) => {
                     e.stopPropagation(); // Prevent the li click event from firing
@@ -782,7 +864,7 @@
                 <textarea class="edit-details">${currentDetails}</textarea>
                 <select class="edit-urgency">
                     <option value="low" ${currentUrgency === 'low' ? 'selected' : ''}>🐌</option>
-                    <option value="medium" ${currentUrgency === 'medium' ? 'selected' : ''}>🐈‍⬛</option>
+                    <option value="medium" ${currentUrgency === 'medium' ? 'selected' : ''}>🐈</option>
                     <option value="high" ${currentUrgency === 'high' ? 'selected' : ''}>🦖</option>
                 </select>
                 <select class="edit-category">
