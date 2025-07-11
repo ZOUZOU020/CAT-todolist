@@ -17,11 +17,11 @@
   },
   "build": {
     "publish": null,
-    "appId": "com.example.electrontodo",
+    "appId": "com.github.ZOUZOU020.cattodolist",
     "productName": "CAT-todolist",
     "win": {
-      "target": "nsis",
-      "icon": "new-icon.png",
+      "target": "portable",
+      "icon": "new-icon.ico",
       "signAndEditExecutable": false
     }
   }

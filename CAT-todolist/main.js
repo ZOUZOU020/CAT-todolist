@@ -1,6 +1,8 @@
 const { app, BrowserWindow, ipcMain, Tray, Menu } = require('electron');
 const path = require('path');
 
+app.setAppUserModelId("com.github.ZOUZOU020.cattodolist");
+
 let mainWindow;
 let tray = null;
 
@@ -11,7 +13,7 @@ function createWindow () {
     frame: false,
     transparent: true,
     title: 'CAT-todolist',
-    icon: path.join(__dirname, 'new-icon.png'), // Replace 'new-icon.png' with your icon file
+    icon: path.join(__dirname, 'new-icon.ico'), // Replace 'new-icon.ico' with your icon file
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
@@ -34,7 +36,7 @@ function createWindow () {
 app.on('ready', () => {
   createWindow();
 
-  tray = new Tray(path.join(__dirname, 'new-icon.png')); // Replace 'new-icon.png' with your icon file
+  tray = new Tray(path.join(__dirname, 'new-icon.ico')); // Replace 'new-icon.ico' with your icon file
   const contextMenu = Menu.buildFromTemplate([
     {
       label: '顯示/隱藏',
