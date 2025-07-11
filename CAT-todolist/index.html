@@ -56,7 +56,7 @@
             flex-direction: column;
             height: calc(100vh - 1.6rem - 150px); /* Adjust for top padding */
             box-sizing: border-box;
-            background-color: var(--background-light);
+            background-color: rgba(221, 216, 216, 0.8); /* 完全不透明 */
             border-radius: 10px;
             padding: 1rem; /* Reduced padding */
             margin: 0 5px; /* Reduced margin */
@@ -84,6 +84,8 @@
             background: #ddd;
             outline: none;
             border-radius: 4px;
+            flex-shrink: 1; /* Allow shrinking */
+            min-width: 50px; /* Prevent it from becoming too small */
         }
         #opacity-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
@@ -109,12 +111,12 @@
             padding-right: 5px; /* space for scrollbar */
         }
         .controls {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
             display: flex;
+            justify-content: flex-end; /* Align to the right */
             align-items: center;
-            gap: 5px; /* Add gap between controls */
+            padding: 0.5rem 0;
+            border-top: 1px solid #ddd;
+            gap: 10px; /* Add some gap */
         }
         body.dark-mode .controls {
             border-top-color: #444;
@@ -129,9 +131,9 @@
             padding: 0.3rem 0.6rem;
         }
         h1 {
-            font-size: 0.8rem;
+            font-size: 1rem;
             margin: 0;
-            color: #8f7e74;
+            color: #a19087;
         }
         body.dark-mode h1 {
             color: #eee;
@@ -144,14 +146,14 @@
         #todo-input, #todo-details-input, #urgency-input, #deadline-input, #assignee-input, .category-area select, select { font-size: 0.9em;
             width: 100%;
             padding: 0.5rem;
-            border: 1px solid #ddd;
+            border: 1px solid #d6c1af;
             border-radius: 4px;
             box-sizing: border-box;
         }
         body.dark-mode #todo-input, body.dark-mode #todo-details-input, body.dark-mode #urgency-input, body.dark-mode #deadline-input, body.dark-mode #assignee-input, body.dark-mode select {
             background-color: #444;
             color: #eee;
-            border-color: #555;
+            border-color: #7d7d7d;
         }
 
         #add-btn, #theme-toggle-btn, #always-on-top-btn, #close-btn { 
@@ -203,15 +205,16 @@
             padding-left: 2.1rem;
         }
 
-        .todo-sub-details {
+        .todo-sub-details{
             font-size: 0.8rem;
-            color: #888;
+            color: #be9595; /* 保持原色，等待用户指定新颜色 */
             margin-top: 0.25rem;
             padding-left: 2.1rem;
         }
-        body.dark-mode .todo-details, body.dark-mode .todo-sub-details { color: #aaa; }
-        .delete-btn, .edit-btn { background: #5c5869; color: white; border: none; padding: 0.3rem 0.3rem; border-radius: 4px; cursor: pointer; margin-left: 5px; margin-right: 5px; /* Added right margin */ }
-        .edit-btn { background: #ece489; }
+        body.dark-mode .todo-details, body.dark-mode  { color: #aaa; }
+.todo-sub-details{ color: #be9595; }
+        .delete-btn, .edit-btn, .delete-category-btn { background: #949494; color: white; border: none; padding: 0.3rem 0.3rem; border-radius: 4px; cursor: pointer; margin-left: 5px; margin-right: 5px; /* Added right margin */ }
+        .edit-btn { background: #ecad25; }
         .edit-form { display: grid; gap: 0.5rem; margin-top: 0.5rem; }
         .edit-form input, .edit-form textarea, .edit-form select { width: 100%; box-sizing: border-box; padding: 0.5rem; border-radius: 4px; border: 1px solid #bcbab1; font-size: 0.9rem;}
         .edit-form button { padding: 0.5rem; border-radius: 4px; border: none; color: white; cursor: pointer; }
@@ -231,21 +234,23 @@
             position: absolute; 
             z-index: 20;
             left: 50%;
-            top: 50%;
+            top: 60%;
             transform: translate(-50%, -50%);
             width: 80%;
-            max-width: 280px;
-            background-color: var(--background-light);
+            max-width: 220px;
+            max-height: 50vh; /* Limit height */
+            overflow-y: auto; /* Add scrollbar when needed */
+            background-color:  rgb(248, 248, 248); /* 完全不透明 */
             border-radius: 8px;
             box-shadow: none;
         }
         .modal-content {
             padding: 1rem;
-            border: 1px solid #ddd;
+            border: 1px solid #a3a0a0;
             border-radius: 8px;
         }
         body.dark-mode .modal {
-            background-color: var(--background-dark);
+            background-color: rgba(79, 75, 73, 1); /* 完全不透明 */
         }
 
         body.dark-mode .modal-content {
@@ -304,13 +309,16 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 5px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 8px;
         }
 
         .category-item-name {
             flex-grow: 1;
-            text-align: left; /* Align text to the left */
+            margin: 0 10px;
+            font-size: 12px;
         }
-        .category-item-name { flex-grow: 1; }
         .category-color-button {
             width: 20px;
             height: 20px;
@@ -342,10 +350,10 @@
         </div>
         <div id="todo-list-container">
             <ul id="todo-list"></ul>
-            <details>
-                <summary>來點新的...</summary>
+            <details style="margin-bottom: 1rem;">
+                <summary>來點有趣的...</summary>
                 <div class="input-area">
-                    <input type="text" id="todo-input" placeholder="這有趣嗎?">
+                    <input type="text" id="todo-input" placeholder="這好玩嗎?">
                     <textarea id="todo-details-input" placeholder="仔細講講😊"></textarea>
                     <select id="urgency-input">
                         <option value="low">🐌</option>
@@ -363,16 +371,16 @@
         </div>
         <div class="controls">
             <input type="range" id="opacity-slider" min="0.2" max="1" step="0.1" value="0.8" title="調整透明度">
-            <button id="always-on-top-btn" style="padding: 0.2rem 0.5rem;">🔓</button>
-            <button id="theme-toggle-btn" style="padding: 0.2rem 0.5rem;">🧙‍♂️</button>
+            <button id="always-on-top-btn">🔓</button>
+            <button id="theme-toggle-btn">🧙‍♂️</button>
         </div>
     </div>
 
     <div id="category-modal" class="modal">
         <div class="modal-content">
             <span class="close-modal-btn">&times;</span>
-            <h2>管理分類</h2>
-            <div id="category-manager">
+            <h2 style="font-size: 1.1em;">管理分類</h2>
+            <div id="category-manager" style="font-size: 9px;">
                 <div class="category-add-form">
                     <input type="text" id="new-category-name" placeholder="新分類名稱">
                     <input type="color" id="new-category-color" value="#e0e0e0">
@@ -512,8 +520,15 @@
                 li.innerHTML = `
                     <button class="category-color-button" style="background-color: ${cat.color}" data-index="${index}"></button>
                     <span class="category-item-name">${cat.name}</span>
-                    <button data-index="${index}">刪除</button>
+                    <button class="delete-category-btn" data-index="${index}">刪除</button>
                 `;
+                li.querySelector('.delete-category-btn').addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent the li click event from firing
+                    categories.splice(e.target.dataset.index, 1);
+                    saveAndRenderCategories();
+                    loadTodos(); // Refresh todos to reflect category removal
+                });
+
                 li.querySelector('.category-color-button').addEventListener('click', (e) => {
                     const index = e.target.dataset.index;
                     const newColor = prompt('Enter new color:', categories[index].color);
@@ -522,11 +537,7 @@
                         saveAndRenderCategories();
                     }
                 });
-                li.querySelector('button[data-index]').addEventListener('click', (e) => {
-                    categories.splice(e.target.dataset.index, 1);
-                    saveAndRenderCategories();
-                    loadTodos(); // Refresh todos to reflect category removal
-                });
+
                 categoryList.appendChild(li);
 
                 // Populate dropdown
@@ -622,7 +633,7 @@
             editBtn.addEventListener('click', () => editTodo(li));
 
             const deleteBtn = document.createElement('button');
-            deleteBtn.textContent = '🪦';
+            deleteBtn.textContent = '💀';
             deleteBtn.className = 'delete-btn';
             deleteBtn.addEventListener('click', () => {
                 todoList.removeChild(li);
@@ -683,6 +694,7 @@
             urgencyInput.value = 'low';
 
             saveTodos();
+            loadTodos(); // Re-sort and re-render the list
         }
 
         function saveTodos() {
@@ -899,7 +911,7 @@
             editBtn.addEventListener('click', () => editTodo(li));
 
             const deleteBtn = document.createElement('button');
-            deleteBtn.textContent = '🪦';
+            deleteBtn.textContent = '💀';
             deleteBtn.className = 'delete-btn';
             deleteBtn.addEventListener('click', () => {
                 todoList.removeChild(li);
