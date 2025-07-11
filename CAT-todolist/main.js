@@ -7,7 +7,7 @@ let tray = null;
 function createWindow () {
   mainWindow = new BrowserWindow({
     width: 450,
-    height: 750,
+    height: 600,
     frame: false,
     transparent: true,
     title: 'CAT-todolist',

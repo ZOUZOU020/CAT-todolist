@@ -5,8 +5,8 @@
     <title>懸浮待辦事項</title>
     <style>
         :root {
-            --primary-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            --base-font-size: 12px;
+            --primary-font: 'Microsoft JhengHei', '微軟正黑體', sans-serif;
+            --base-font-size: 10.5px;
             --background-light: rgba(221, 216, 216, 0.8);
             --text-color-light: #7b706b;
             --background-dark: rgba(79, 75, 73, 0.8);
@@ -22,7 +22,7 @@
             background-color: transparent; /* Make body transparent */
             color: var(--text-color-light);
             margin: 0;
-            padding: 0.2rem; /* Reduced padding */
+            padding: 0.1rem; /* Further reduced padding */
             padding-top: 150px; /* Make space for the GIF */
             border-radius: 10px;
             font-size: var(--base-font-size);
@@ -40,11 +40,12 @@
             z-index: 10;
             display: flex;
             justify-content: center;
+            -webkit-app-region: drag; /* Allow dragging */
         }
 
         #gif-container img {
             width: 200px; /* Fixed width */
-            pointer-events: auto; /* Allow clicks on the GIF */
+            pointer-events: none; /* Disable clicks on the GIF */
         }
         body.dark-mode {
             background-color: transparent;
@@ -58,8 +59,8 @@
             box-sizing: border-box;
             background-color: rgba(221, 216, 216, 0.8); /* 完全不透明 */
             border-radius: 10px;
-            padding: 1rem; /* Reduced padding */
-            margin: 0 5px; /* Reduced margin */
+            padding: 0.5rem; /* Further reduced padding */
+            margin: 0 2px; /* Further reduced margin */
         }
         body.dark-mode .container {
             background-color: var(--background-dark);
@@ -177,46 +178,72 @@
         ul { list-style: none; padding: 0; margin: 0; }
         li {
             background: rgba(255,255,255,0.8);
-            padding: 0.7rem;
             border-radius: 6px;
-            display: flex;
-            flex-direction: column;
             margin-bottom: 0.4rem;
             border: 1px solid #eee;
+            padding: 0.5rem;
+        }
+
+        li details > summary {
+            list-style: none; /* Hide the default triangle */
+            cursor: pointer;
+            font-weight: normal;
+        }
+
+        li details > summary::-webkit-details-marker {
+            display: none; /* Hide the default triangle in Chrome */
         }
         body.dark-mode li {
             background: rgba(50,50,50,0.7);
             border-color: #444;
         }
 
-        summary {
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 0.7rem;
+        .todo-summary-content {
+            display: flex;
+            align-items: center;
+            width: 100%;
         }
-        .todo-main { display: flex; align-items: center; width: 100%; }
-        .todo-main span { flex-grow: 1; min-width: 0; overflow-wrap: break-word; font-size: 0.9rem; }
-        .todo-main input[type="checkbox"] { margin-right: 0.5rem; }
-        li.completed .todo-main span { text-decoration: line-through; color: #888; }
+
+        .todo-title {
+            flex-grow: 1;
+            min-width: 0;
+            overflow-wrap: break-word;
+            font-size: 0.9rem;
+        }
+
+
+        .todo-summary-content input[type="checkbox"] { margin-right: 0.5rem; }
+        li.completed .todo-title { text-decoration: line-through; color: #888; }
+        .todo-content {
+            padding: 0.5rem 0 0 1.5rem; /* Indent content */
+        }
+
         .todo-details {
             font-size: 13px;
             color: #555;
-            margin-top: 0.25rem;
-            padding-left: 2.1rem;
+            margin-bottom: 0.5rem;
         }
 
-        .todo-sub-details{
+        .todo-actions {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .todo-deadline {
             font-size: 0.8rem;
-            color: #be9595; /* 保持原色，等待用户指定新颜色 */
-            margin-top: 0.25rem;
-            padding-left: 2.1rem;
+            color: #be9595;
         }
         body.dark-mode .todo-details, body.dark-mode  { color: #aaa; }
 .todo-sub-details{ color: #be9595; }
         .delete-btn, .edit-btn, .delete-category-btn { background: #949494; color: white; border: none; padding: 0.3rem 0.3rem; border-radius: 4px; cursor: pointer; margin-left: 5px; margin-right: 5px; /* Added right margin */ }
         .edit-btn { background: #ecad25; }
         .edit-form { display: grid; gap: 0.5rem; margin-top: 0.5rem; }
-        .edit-form input, .edit-form textarea, .edit-form select { width: 100%; box-sizing: border-box; padding: 0.5rem; border-radius: 4px; border: 1px solid #bcbab1; font-size: 0.9rem;}
+        .edit-form input, .edit-form textarea, .edit-form select { width: 100%; box-sizing: border-box; padding: 0.3rem; border-radius: 4px; border: 1px solid #bcbab1; font-size: 0.8rem;}
+        .edit-form {
+            padding-left: 1.5rem; /* Align with todo-content */
+        }
         .edit-form button { padding: 0.5rem; border-radius: 4px; border: none; color: white; cursor: pointer; }
         .save-btn { background-color: #41ba5d; }
         .cancel-btn { background-color: #6c757d; }
@@ -236,8 +263,8 @@
             left: 50%;
             top: 60%;
             transform: translate(-50%, -50%);
-            width: 80%;
-            max-width: 220px;
+            width: 90%;
+            max-width: 200px; /* Reduced max-width */
             max-height: 50vh; /* Limit height */
             overflow-y: auto; /* Add scrollbar when needed */
             background-color:  rgb(248, 248, 248); /* 完全不透明 */
@@ -287,7 +314,7 @@
 
         #new-category-name {
             flex-grow: 1;
-            min-width: 100px; /* Prevent shrinking too much */
+            min-width: 80px; /* Reduced width */
         }
 
         #new-category-color {
@@ -306,18 +333,19 @@
         }
         #category-list li {
             display: flex;
-            justify-content: space-between;
+            justify-content: center; /* Centered content */
             align-items: center;
             margin-bottom: 5px;
             background-color: rgba(255, 255, 255, 0.8);
-            padding: 10px;
+            padding: 5px; /* Reduced padding */
             border-radius: 8px;
         }
 
         .category-item-name {
             flex-grow: 1;
-            margin: 0 10px;
+            margin: 0 5px; /* Reduced margin */
             font-size: 12px;
+            text-align: center;
         }
         .category-color-button {
             width: 20px;
@@ -378,9 +406,11 @@
 
     <div id="category-modal" class="modal">
         <div class="modal-content">
-            <span class="close-modal-btn">&times;</span>
-            <h2 style="font-size: 1.1em;">管理分類</h2>
-            <div id="category-manager" style="font-size: 9px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="font-size: 1.1em; margin: 0;">管理分類</h2>
+                <span class="close-modal-btn" style="cursor: pointer;">&times;</span>
+            </div>
+            <div id="category-manager" style="font-size: 9px; margin-top: 0.5rem;">
                 <div class="category-add-form">
                     <input type="text" id="new-category-name" placeholder="新分類名稱">
                     <input type="color" id="new-category-color" value="#e0e0e0">
@@ -438,7 +468,7 @@
             }, 14000); // Increased duration to ensure full playback
         }
 
-        characterGif.addEventListener('click', playInteraction);
+
         window.addEventListener('mousemove', (e) => {
             // This is a simple trigger, you might want something more sophisticated
             if (e.movementX !== 0 || e.movementY !== 0) {
@@ -607,86 +637,20 @@
                 appTitle.textContent = savedTitle;
             }
         }
-        addBtn.addEventListener('click', addTodo);
-
-
-        function addTodo() {
+        addBtn.addEventListener('click', () => {
             const todoText = todoInput.value.trim();
             if (todoText === '') return;
 
-            const li = document.createElement('li');
-            
+            const newTodo = {
+                text: todoText,
+                details: detailsInput.value.trim(),
+                urgency: urgencyInput.value,
+                deadline: deadlineInput.value,
+                completed: false,
+                category: categoryInput.value
+            };
 
-            const mainDiv = document.createElement('div');
-            mainDiv.className = 'todo-main';
-
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.addEventListener('change', () => li.classList.toggle('completed'));
-
-            const span = document.createElement('span');
-            span.textContent = todoText;
-
-            const editBtn = document.createElement('button');
-            editBtn.textContent = '🎅';
-            editBtn.className = 'edit-btn'; // Add a class for styling
-            editBtn.addEventListener('click', () => editTodo(li));
-
-            const deleteBtn = document.createElement('button');
-            deleteBtn.textContent = '💀';
-            deleteBtn.className = 'delete-btn';
-            deleteBtn.addEventListener('click', () => {
-                todoList.removeChild(li);
-                saveTodos();
-            });
-
-            mainDiv.appendChild(checkbox);
-            mainDiv.appendChild(span);
-            mainDiv.appendChild(editBtn);
-            mainDiv.appendChild(deleteBtn);
-
-            li.appendChild(mainDiv);
-
-            const detailsDiv = document.createElement('div');
-            detailsDiv.className = 'todo-details';
-            detailsDiv.textContent = detailsInput.value.trim();
-
-            const subDetailsDiv = document.createElement('div');
-            subDetailsDiv.className = 'todo-sub-details';
-
-            const urgency = urgencyInput.value;
-            const deadline = deadlineInput.value;
-            const category = categoryInput.value;
-
-            const urgencySpan = document.createElement('span');
-            urgencySpan.className = `urgency-${urgency}`;
-            urgencySpan.textContent = ` ${urgencyEmojis[urgency]} `;
-
-            span.appendChild(urgencySpan);
-
-            if (detailsDiv.textContent) {
-                li.appendChild(detailsDiv);
-            }
-
-            if (deadline) {
-                subDetailsDiv.innerHTML += `<span>死線: ${deadline}</span>`;
-            }
-            if (category) {
-                const categoryData = categories.find(c => c.name === category);
-                if (categoryData) {
-                    const colorDiv = document.createElement('div');
-                    colorDiv.className = 'todo-category-color';
-                    colorDiv.style.backgroundColor = categoryData.color;
-                    li.prepend(colorDiv);
-                    li.dataset.category = category; // Set category on the element
-                }
-            }
-
-            if (subDetailsDiv.hasChildNodes()) {
-                li.appendChild(subDetailsDiv);
-            }
-
-            todoList.prepend(li);
+            addTodoFromData(newTodo);
 
             todoInput.value = '';
             detailsInput.value = '';
@@ -694,21 +658,25 @@
             urgencyInput.value = 'low';
 
             saveTodos();
-            loadTodos(); // Re-sort and re-render the list
-        }
+            loadTodos(); // Re-sort and re-render
+        });
+
+
+
 
         function saveTodos() {
             const todos = [];
             document.querySelectorAll('#todo-list li').forEach(li => {
                 if (li.classList.contains('editing')) return; // Don't save tasks being edited
-
+                const detailsElement = li.querySelector('details');
                 const todo = {
-                    text: li.querySelector('.todo-main span').childNodes[0].textContent.trim(),
+                    text: li.querySelector('.todo-title').textContent.trim(),
                     details: li.querySelector('.todo-details') ? li.querySelector('.todo-details').textContent : '',
                     urgency: li.querySelector('[class^="urgency-"]').className.replace('urgency-', ''),
-                    deadline: li.querySelector('.todo-sub-details span') ? li.querySelector('.todo-sub-details span').textContent.replace('死線: ', '') : '',
+                    deadline: li.querySelector('.todo-deadline') ? li.querySelector('.todo-deadline').textContent : '',
                     completed: li.classList.contains('completed'),
-                    category: li.dataset.category || '' // Read category from dataset
+                    category: li.dataset.category || '',
+                    open: detailsElement ? detailsElement.open : false
                 };
                 todos.push(todo);
             });
@@ -759,112 +727,54 @@
             if (li.classList.contains('editing')) return;
             li.classList.add('editing');
 
-            const mainDiv = li.querySelector('.todo-main');
-            const detailsDiv = li.querySelector('.todo-details');
-            const subDetailsDiv = li.querySelector('.todo-sub-details');
+            const detailsElement = li.querySelector('details');
+            const summaryElement = li.querySelector('summary');
+            const contentElement = li.querySelector('.todo-content');
 
-            // Store original content
-            const originalContent = mainDiv.innerHTML;
-            const originalDetails = detailsDiv ? detailsDiv.innerHTML : '';
-            const originalSubDetails = subDetailsDiv ? subDetailsDiv.innerHTML : '';
-
-            mainDiv.style.display = 'none';
-            if (detailsDiv) detailsDiv.style.display = 'none';
-            if (subDetailsDiv) subDetailsDiv.style.display = 'none';
+            summaryElement.style.display = 'none';
+            if (contentElement) contentElement.style.display = 'none';
 
             const editForm = createEditForm(li);
-            li.appendChild(editForm);
+            detailsElement.appendChild(editForm);
 
             editForm.querySelector('.save-btn').addEventListener('click', () => {
-                const newText = editForm.querySelector('.edit-text').value;
-                const newDetails = editForm.querySelector('.edit-details').value;
-                const newUrgency = editForm.querySelector('.edit-urgency').value;
-                const newDeadline = editForm.querySelector('.edit-deadline').value;
-                const newCategory = editForm.querySelector('.edit-category').value;
+                // No need to reload the entire list, just update this item
+                const newTodoData = {
+                    text: editForm.querySelector('.edit-text').value,
+                    details: editForm.querySelector('.edit-details').value,
+                    urgency: editForm.querySelector('.edit-urgency').value,
+                    deadline: editForm.querySelector('.edit-deadline').value,
+                    category: editForm.querySelector('.edit-category').value,
+                    completed: li.classList.contains('completed'),
+                    open: true // Keep it open after editing
+                };
 
-                // Update the UI
-                const span = mainDiv.querySelector('span');
-                span.childNodes[0].nodeValue = newText + ' ';
+                const newLi = createTodoLi(newTodoData);
+                li.replaceWith(newLi);
                 
-                let urgencySpan = span.querySelector('[class^="urgency-"]');
-                if (!urgencySpan) {
-                    urgencySpan = document.createElement('span');
-                    span.appendChild(urgencySpan);
-                }
-                urgencySpan.className = `urgency-${newUrgency}`;
-                urgencySpan.textContent = ` ${urgencyEmojis[newUrgency]} `;
-
-                // Update details
-                let currentDetailsDiv = li.querySelector('.todo-details');
-                if (newDetails) {
-                    if (!currentDetailsDiv) {
-                        currentDetailsDiv = document.createElement('div');
-                        currentDetailsDiv.className = 'todo-details';
-                        mainDiv.insertAdjacentElement('afterend', currentDetailsDiv);
-                    }
-                    currentDetailsDiv.textContent = newDetails;
-                } else if (currentDetailsDiv) {
-                    currentDetailsDiv.remove();
-                }
-
-                // Update sub-details (deadline)
-                let currentSubDetailsDiv = li.querySelector('.todo-sub-details');
-                if (newDeadline) {
-                    if (!currentSubDetailsDiv) {
-                        currentSubDetailsDiv = document.createElement('div');
-                        currentSubDetailsDiv.className = 'todo-sub-details';
-                        li.appendChild(currentSubDetailsDiv);
-                    }
-                    currentSubDetailsDiv.innerHTML = `<span>死線: ${newDeadline}</span>`;
-                } else if (currentSubDetailsDiv) {
-                    currentSubDetailsDiv.remove();
-                }
-                
-                // Update category
-                li.dataset.category = newCategory;
-                const oldColorDiv = li.querySelector('.todo-category-color');
-                if (oldColorDiv) oldColorDiv.remove();
-                if (newCategory) {
-                    const categoryData = categories.find(c => c.name === newCategory);
-                    if (categoryData) {
-                        const colorDiv = document.createElement('div');
-                        colorDiv.className = 'todo-category-color';
-                        colorDiv.style.backgroundColor = categoryData.color;
-                        li.prepend(colorDiv);
-                    }
-                }
-
-                // Restore visibility and clean up
-                mainDiv.style.display = 'flex';
-                li.querySelectorAll('.todo-details, .todo-sub-details').forEach(el => el.style.display = 'block');
-
-                li.removeChild(editForm);
-                li.classList.remove('editing');
                 saveTodos();
-                loadTodos(); // Reload to apply sorting and grouping
             });
 
             editForm.querySelector('.cancel-btn').addEventListener('click', () => {
-                mainDiv.style.display = 'flex';
-                if (detailsDiv) detailsDiv.style.display = 'block';
-                if (subDetailsDiv) subDetailsDiv.style.display = 'block';
-                li.removeChild(editForm);
+                summaryElement.style.display = 'block';
+                if (contentElement) contentElement.style.display = 'block';
+                editForm.remove();
                 li.classList.remove('editing');
             });
         }
 
         function createEditForm(li) {
-            const currentText = li.querySelector('.todo-main span').childNodes[0].textContent.trim();
+            const currentText = li.querySelector('.todo-title').textContent.trim();
             const currentDetails = li.querySelector('.todo-details') ? li.querySelector('.todo-details').textContent : '';
             const currentUrgency = li.querySelector('[class^="urgency-"]').className.replace('urgency-', '');
-            const deadlineSpan = li.querySelector('.todo-sub-details span');
-            const currentDeadline = deadlineSpan ? deadlineSpan.textContent.replace('死線: ', '') : '';
+            const deadlineSpan = li.querySelector('.todo-deadline');
+            const currentDeadline = deadlineSpan ? deadlineSpan.textContent : '';
             const currentCategory = li.dataset.category || '';
 
             const form = document.createElement('div');
             form.className = 'edit-form';
             
-            let categoryOptions = '<option value="">無分類</option>'; // Add a default empty option
+            let categoryOptions = '<option value="">無分類</option>';
             categoryOptions += categories.map(c => `<option value="${c.name}" ${currentCategory === c.name ? 'selected' : ''}>${c.name}</option>`).join('');
 
             form.innerHTML = `
@@ -879,72 +789,19 @@
                     ${categoryOptions}
                 </select>
                 <input type="date" class="edit-deadline" value="${currentDeadline}">
-                <button class="save-btn">儲存</button>
-                <button class="cancel-btn">取消</button>
+                <div class="todo-actions">
+                    <button class="save-btn">儲存</button>
+                    <button class="cancel-btn">取消</button>
+                </div>
             `;
             return form;
         }
 
-        function addTodoFromData(todo) {
+        function createTodoLi(todo) {
             const li = document.createElement('li');
             if (todo.completed) {
                 li.classList.add('completed');
             }
-
-            const mainDiv = document.createElement('div');
-            mainDiv.className = 'todo-main';
-
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.checked = todo.completed;
-            checkbox.addEventListener('change', () => {
-                li.classList.toggle('completed');
-                saveTodos();
-            });
-
-            const span = document.createElement('span');
-            span.textContent = todo.text;
-
-            const editBtn = document.createElement('button');
-            editBtn.textContent = '🎅';
-            editBtn.className = 'edit-btn';
-            editBtn.addEventListener('click', () => editTodo(li));
-
-            const deleteBtn = document.createElement('button');
-            deleteBtn.textContent = '💀';
-            deleteBtn.className = 'delete-btn';
-            deleteBtn.addEventListener('click', () => {
-                todoList.removeChild(li);
-                saveTodos();
-            });
-
-            mainDiv.appendChild(checkbox);
-            mainDiv.appendChild(span);
-            mainDiv.appendChild(editBtn);
-            mainDiv.appendChild(deleteBtn);
-
-            li.appendChild(mainDiv);
-
-            const urgencySpan = document.createElement('span');
-            urgencySpan.className = `urgency-${todo.urgency}`;
-            urgencySpan.textContent = ` ${urgencyEmojis[todo.urgency]} `;
-
-            span.appendChild(urgencySpan);
-
-            if (todo.details) {
-                const detailsDiv = document.createElement('div');
-                detailsDiv.className = 'todo-details';
-                detailsDiv.textContent = todo.details;
-                li.appendChild(detailsDiv);
-            }
-
-            if (todo.deadline) {
-                const subDetailsDiv = document.createElement('div');
-                subDetailsDiv.className = 'todo-sub-details';
-                subDetailsDiv.innerHTML = `<span>死線: ${todo.deadline}</span>`;
-                li.appendChild(subDetailsDiv);
-            }
-
             if (todo.category) {
                 const categoryData = categories.find(c => c.name === todo.category);
                 if (categoryData) {
@@ -956,6 +813,87 @@
                 }
             }
 
+            const details = document.createElement('details');
+            if (todo.open) {
+                details.open = true;
+            }
+
+            const summary = document.createElement('summary');
+            const summaryContent = document.createElement('div');
+            summaryContent.className = 'todo-summary-content';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = todo.completed;
+            checkbox.addEventListener('change', (e) => {
+                e.stopPropagation();
+                li.classList.toggle('completed');
+                saveTodos();
+            });
+
+            const titleSpan = document.createElement('span');
+            titleSpan.className = 'todo-title';
+            titleSpan.textContent = todo.text;
+
+            const urgencySpan = document.createElement('span');
+            urgencySpan.className = `urgency-${todo.urgency}`;
+            urgencySpan.textContent = ` ${urgencyEmojis[todo.urgency]} `;
+
+            summaryContent.appendChild(checkbox);
+            summaryContent.appendChild(titleSpan);
+            summaryContent.appendChild(urgencySpan);
+            summary.appendChild(summaryContent);
+
+            const todoContent = document.createElement('div');
+            todoContent.className = 'todo-content';
+
+            if (todo.details) {
+                const detailsDiv = document.createElement('div');
+                detailsDiv.className = 'todo-details';
+                detailsDiv.textContent = todo.details;
+                todoContent.appendChild(detailsDiv);
+            }
+
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'todo-actions';
+
+            if (todo.deadline) {
+                const deadlineSpan = document.createElement('span');
+                deadlineSpan.className = 'todo-deadline';
+                deadlineSpan.textContent = todo.deadline;
+                actionsDiv.appendChild(deadlineSpan);
+            }
+
+            const editBtn = document.createElement('button');
+            editBtn.textContent = '🎅';
+            editBtn.className = 'edit-btn';
+            editBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                editTodo(li);
+            });
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = '💀';
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                li.remove();
+                saveTodos();
+            });
+
+            actionsDiv.appendChild(editBtn);
+            actionsDiv.appendChild(deleteBtn);
+            todoContent.appendChild(actionsDiv);
+
+            details.appendChild(summary);
+            details.appendChild(todoContent);
+            li.appendChild(details);
+
+            return li;
+        }
+
+        function addTodoFromData(todo) {
+            const li = createTodoLi(todo);
             todoList.appendChild(li);
         }
     </script>
