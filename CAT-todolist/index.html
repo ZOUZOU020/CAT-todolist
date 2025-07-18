@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <title>懸浮待辦事項</title>
     <style>
+        body.ghost-mode-active {
+            pointer-events: none;
+        }
+
+        body.ghost-mode-active .controls,
+        body.ghost-mode-active .header {
+            pointer-events: auto;
+        }
         :root {
             --primary-font: 'Microsoft JhengHei', '微軟正黑體', sans-serif;
             --base-font-size: 10.5px;
@@ -11,10 +19,10 @@
             --text-color-light: #7b706b;
             --background-dark: rgba(79, 75, 73, 0.8);
             --text-color-dark: #eee;
-            --button-bg-color: #c4bcb2;
+            --button-bg-color: #c3bbb2;
             --button-text-color: white;
             --button-border-radius: 8px;
-            --button-padding: 0.4rem 0.7rem;
+            --button-padding: 0.4rem 0.6rem;
         }
 
         body {
@@ -29,7 +37,15 @@
             overflow: hidden;
             position: relative;
         }
-
+h1 {
+    display: block;
+    font-size: 1.5em;
+    margin-block-start: 0.67em;
+    margin-block-end: 0.67em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+}
         #gif-container {
             position: absolute;
             top: 12px;
@@ -58,8 +74,8 @@
             box-sizing: border-box;
             background-color: rgba(233, 231, 231, 0.9); /* 完全不透明 */
             border-radius: 10px;
-            padding: 1rem 0.6rem 0.6rem 0.8rem; /* Further reduced padding 上右下左 */
-            margin: 0 2px; /* Further reduced margin */
+            padding: 0.8rem 0.6rem 0.6rem 0.8rem; /* Further reduced padding 上右下左 */
+            margin: 3px 2px; /* Further reduced margin */
         }
         body.dark-mode .container {
             background-color: var(--background-dark);
@@ -116,8 +132,10 @@
             align-items: center;
             padding: 0.5rem 0;
             border-top: 1px solid #ddd;
-            gap: 10px; /* Add some gap */
+            gap: 1px; /* Reduced gap */
         }
+
+
         body.dark-mode .controls {
             border-top-color: #444;
         }
@@ -127,13 +145,21 @@
         .controls input[type="range"] {
             width: 80px;
         }
-        #theme-toggle-btn {
-            padding: 0.3rem 0.6rem;
+        .controls button {
+            margin: 0 1px;
+            font-size: 12px;
         }
-        h1 {
-            font-size: 0.9rem;
-            margin: 0;
-            color: #a19087;
+
+        #always-on-top-btn.active {
+            background-color: #6fab7e; /* Blue for active state */
+        }
+
+        #ghost-mode-btn.active {
+            background-color: #98acaf; /* Green for active state */
+        }
+
+        #theme-toggle-btn.dark-mode-active {
+            background-color: #514f53; /* Darker background for dark mode active */
         }
         body.dark-mode h1 {
             color: #dfdfdf;
@@ -159,14 +185,29 @@
             border-color: #7d7d7d;
         }
 
-        #add-btn, #theme-toggle-btn, #always-on-top-btn, #close-btn { 
+        .control-button {
             padding: var(--button-padding);
-            border: none; 
+            border: none;
             color: var(--button-text-color);
             font-size: 1rem;
             border-radius: var(--button-border-radius);
-            cursor: pointer; 
+            cursor: pointer;
             background-color: var(--button-bg-color);
+            transition: background-color 0.2s ease;
+        }
+
+        .control-button:hover {
+            opacity: 0.8;
+        }
+
+        .control-button:active {
+            background-color: #888; /* 按下時的顏色 */
+            transform: translateY(1px); /* 輕微下沉效果 */
+        }
+
+        #add-btn {
+            background-color: #92ac98;
+            width: 100%;
         }
         #close-btn {
             background: transparent;
@@ -174,12 +215,29 @@
             font-size: 1rem;
             padding: 0 .3rem;
             line-height: 1;
+            border: none;
+            outline: none;
         }
-        #add-btn { background-color: #92ac98; width: 100%; }
+
+        #close-btn:hover {
+            cursor: pointer;
+        }
+        #add-btn {
+            background-color: #92ac98;
+            width: 100%;
+            padding: 0.3rem;
+            border: none;
+            border-radius: 8px;
+        }
+
+        #add-btn:hover {
+            cursor: pointer;
+        }
 
         ul { list-style: none; padding: 0; margin: 0; }
         li {
             background: rgba(255,255,255,0.8);
+        
             border-radius: 6px;
             margin-bottom: 0.4rem;
             border: 1px solid #eee;
@@ -245,7 +303,7 @@
     left: 3px;
     top: -1px;
     width: 5px;
-    height: 9px;
+    height: 8px;
     
     /* 用邊框技巧畫出一個「V」形狀的勾 */
     border: solid #d46142; /* 打勾符號的顏色 */
@@ -311,7 +369,7 @@ li.completed .todo-summary-content input[type="checkbox"]::after {
         body.dark-mode .todo-details { color: #ccc; } /* Adjust for lighter color in dark mode */
 .todo-sub-details{ color: #be9595; }
 .todo-sub-details{ color: #be9595; }
-        .delete-btn, .edit-btn, .delete-category-btn { background: #949494; color: white; border: none; padding: 0.3rem 0.3rem; border-radius: 4px; cursor: pointer; margin-left: 3px; margin-right: 3px; /* Added right margin */ }
+        .delete-btn, .edit-btn, .delete-category-btn { background: #949494; color: white; border: none; padding: 0.3rem 0.3rem; border-radius: 4px; cursor: pointer; margin-left: 1px; margin-right: 1px; /* Added right margin */ }
         .edit-btn { background: #ecad25; }
         .edit-form { display: grid; gap: 0.5rem; margin-top: 0.5rem; }
         .edit-form input, .edit-form textarea, .edit-form select { width: 100%; box-sizing: border-box; padding: 0.3rem; border-radius: 4px; border: 1px solid #d8d6cc; font-size: 0.8rem; font-family: 'Microsoft JhengHei', '微軟正黑體', sans-serif;}
@@ -411,6 +469,11 @@ li.completed .todo-summary-content input[type="checkbox"]::after {
         }
         #category-manager button {
             padding: 8px 12px;
+            cursor: pointer;
+        }
+
+        #category-manager button:hover {
+            cursor: pointer;
         }
         #category-list button.delete-category-btn { background-color: #e74c3c; font-size: 0.7rem; padding: 0.2rem 0.4rem; } /* 調整刪除按鈕樣式 */
         #category-list li {
@@ -447,6 +510,9 @@ li.completed .todo-summary-content input[type="checkbox"]::after {
         }
         li { position: relative; padding-left: 0.5rem; /* Adjust padding */ }
         .todo-main { padding-left: 0.5rem; }
+
+
+    
     </style>
 </head>
 <body>
@@ -455,15 +521,15 @@ li.completed .todo-summary-content input[type="checkbox"]::after {
     </div>
     <div class="container">
         <div class="header">
-            <h1 id="app-title" title="雙擊即可編輯標題">咪咪咪咪凹</h1>
-            <button id="close-btn">❌</button>
-        </div>
+                <h1 id="app-title" title="雙擊即可編輯標題">咪咪咪咪凹</h1>
+                <button id="close-btn">❌</button>
+            </div>
         <div id="todo-list-container">
             <ul id="todo-list"></ul>
             <details style="margin-bottom: 1rem;">
-                <summary>來點有趣的...</summary>
+                <summary>有什麼事情要做嗎？</summary>
                 <div class="input-area">
-                    <input type="text" id="todo-input" placeholder="這好玩嗎?">
+                    <input type="text" id="todo-input" placeholder="我希望這很好玩">
                     <textarea id="todo-details-input" placeholder="仔細講講😊"></textarea>
                     <select id="urgency-input">
                         <option value="low" style="font-size: 1.2em;">🐌</option>
@@ -481,8 +547,9 @@ li.completed .todo-summary-content input[type="checkbox"]::after {
         </div>
         <div class="controls">
             <input type="range" id="opacity-slider" min="0.2" max="1" step="0.1" value="0.8" title="調整透明度">
-            <button id="always-on-top-btn">🔓</button>
-            <button id="theme-toggle-btn">🧙‍♂️</button>
+            <button id="always-on-top-btn" class="control-button">🔒</button>
+            <button id="ghost-mode-btn" class="control-button">👻</button>
+            <button id="theme-toggle-btn" class="control-button">🧙‍♂️</button>
         </div>
     </div>
 
@@ -510,23 +577,57 @@ li.completed .todo-summary-content input[type="checkbox"]::after {
 
         let isAlwaysOnTop = true;
         const alwaysOnTopBtn = document.getElementById('always-on-top-btn');
-        alwaysOnTopBtn.addEventListener('click', () => {
+        function toggleAlwaysOnTop() {
             isAlwaysOnTop = !isAlwaysOnTop;
             window.electronAPI.setAlwaysOnTop(isAlwaysOnTop);
-            alwaysOnTopBtn.style.backgroundColor = isAlwaysOnTop ? '#28a745' : '#dc3545';
             alwaysOnTopBtn.textContent = isAlwaysOnTop ? '🔒' : '🔓';
-        });
-
+            alwaysOnTopBtn.classList.toggle('active', isAlwaysOnTop);
+        }
+        alwaysOnTopBtn.addEventListener('click', toggleAlwaysOnTop);
         // Set initial state
-        alwaysOnTopBtn.style.backgroundColor = '#28a745';
-        alwaysOnTopBtn.textContent = '🔒';
+        alwaysOnTopBtn.classList.add('active');
 
-        document.getElementById('theme-toggle-btn').addEventListener('click', () => {
+        const themeToggleBtn = document.getElementById('theme-toggle-btn');
+        themeToggleBtn.addEventListener('click', () => {
             document.body.classList.toggle('dark-mode');
+            themeToggleBtn.classList.toggle('dark-mode-active', document.body.classList.contains('dark-mode'));
         });
+
+        // Set initial theme button state based on body class
+        if (document.body.classList.contains('dark-mode')) {
+            themeToggleBtn.classList.add('dark-mode-active');
+        } else {
+            themeToggleBtn.classList.remove('dark-mode-active');
+        }
 
         document.getElementById('close-btn').addEventListener('click', () => {
             window.electronAPI.closeApp();
+        });
+
+
+
+        let isGhostMode = false;
+        const ghostModeBtn = document.getElementById('ghost-mode-btn');
+        function toggleGhostMode() {
+            window.electronAPI.toggleGhostMode();
+        }
+
+        ghostModeBtn.addEventListener('click', toggleGhostMode);
+
+        // Listen for keyboard events and send to main process
+        window.addEventListener('keydown', (event) => {
+            window.electronAPI.onKeyDown(event.key);
+        });
+
+        window.electronAPI.onGhostModeState(isGhostMode => {
+            ghostModeBtn.classList.toggle('active', isGhostMode);
+            document.body.classList.toggle('ghost-mode-active', isGhostMode);
+            // Ensure pointer events are re-enabled when ghost mode is off
+            if (!isGhostMode) {
+                document.body.style.pointerEvents = 'auto';
+            } else {
+                document.body.style.pointerEvents = 'none';
+            }
         });
 
         const characterGif = document.getElementById('character-gif');
